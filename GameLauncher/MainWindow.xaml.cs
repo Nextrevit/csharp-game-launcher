@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace GameLauncher
@@ -17,9 +18,6 @@ namespace GameLauncher
         downloadingUpdate
     }
 
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private readonly string rootPath;
@@ -28,6 +26,8 @@ namespace GameLauncher
         private readonly string gameExe;
 
         private LauncherStatus _status;
+        private readonly IProgress<int> _downloadProgress;
+
         internal LauncherStatus Status
         {
             get => _status;
@@ -62,6 +62,12 @@ namespace GameLauncher
             versionFile = Path.Combine(rootPath, "Version.txt");
             gameZip = Path.Combine(rootPath, "Renvirons Project.zip");
             gameExe = Path.Combine(rootPath, "RENVIRONS_BUILDFILES", "Renvirons Project.exe");
+
+            _downloadProgress = new Progress<int>(percentage =>
+            {
+                ProgressBar.Value = percentage;
+                StatusText.Text = $"Downloading... {percentage}%";
+            });
         }
 
         private async void CheckForUpdates()
@@ -74,7 +80,8 @@ namespace GameLauncher
                 try
                 {
                     using HttpClient httpClient = new();
-                    Version onlineVersion = new(await httpClient.GetStringAsync("https://www.dropbox.com/s/uowcriov5cod7wt/Version.txt?dl=1"));
+                    string versionString = await httpClient.GetStringAsync("https://www.dropbox.com/s/uowcriov5cod7wt/Version.txt?dl=1");
+                    Version onlineVersion = new(versionString);
 
                     if (onlineVersion.IsDifferentThan(localVersion))
                     {
@@ -93,11 +100,23 @@ namespace GameLauncher
             }
             else
             {
-                InstallGameFiles(false, Version.zero);
+                try
+                {
+                    using HttpClient httpClient = new();
+                    string versionString = await httpClient.GetStringAsync("https://www.dropbox.com/s/uowcriov5cod7wt/Version.txt?dl=1");
+                    Version onlineVersion = new(versionString);
+
+                    InstallGameFiles(false, onlineVersion);
+                }
+                catch (Exception ex)
+                {
+                    Status = LauncherStatus.failed;
+                    MessageBox.Show($"Error checking for game updates: {ex}");
+                }
             }
         }
 
-        private async void InstallGameFiles(bool _isUpdate, Version zero)
+        private async void InstallGameFiles(bool _isUpdate, Version onlineVersion)
         {
             try
             {
@@ -109,19 +128,31 @@ namespace GameLauncher
                 else
                 {
                     Status = LauncherStatus.downloadingGame;
-                    Version onlineVersion = new(await httpClient.GetStringAsync("https://www.dropbox.com/s/uowcriov5cod7wt/Version.txt?dl=1"));
                 }
 
-                using (HttpResponseMessage response = await httpClient.GetAsync("https://www.dropbox.com/s/4txqq97xuej54dq/Renvirons%20Project.zip?dl=1"))
+                using (HttpResponseMessage response = await httpClient.GetAsync("https://www.dropbox.com/s/4txqq97xuej54dq/Renvirons%20Project.zip?dl=1", HttpCompletionOption.ResponseHeadersRead))
                 {
                     response.EnsureSuccessStatusCode();
 
                     using Stream contentStream = await response.Content.ReadAsStreamAsync(),
-                                  stream = new FileStream(gameZip, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
-                    await contentStream.CopyToAsync(stream);
+                        stream = new FileStream(gameZip, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+                    long totalBytes = response.Content.Headers.ContentLength ?? -1;
+                    long receivedBytes = 0;
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
+                    {
+                        await stream.WriteAsync(buffer.AsMemory(0, bytesRead));
+                        receivedBytes += bytesRead;
+                        if (totalBytes > 0)
+                        {
+                            int percentage = (int)((receivedBytes / (double)totalBytes) * 100);
+                            _downloadProgress.Report(percentage);
+                        }
+                    }
                 }
 
-                DownloadGameCompletedCallback(null, null);
+                DownloadGameCompletedCallback(null, new AsyncCompletedEventArgs(null, false, onlineVersion));
             }
             catch (Exception ex)
             {
@@ -134,14 +165,21 @@ namespace GameLauncher
         {
             try
             {
-                string onlineVersion = ((Version)e.UserState).ToString();
-                ZipFile.ExtractToDirectory(gameZip, rootPath, true);
-                File.Delete(gameZip);
+                if (e.UserState != null)
+                {
+                    string onlineVersion = ((Version)e.UserState).ToString();
+                    ZipFile.ExtractToDirectory(gameZip, rootPath, true);
+                    File.Delete(gameZip);
+                    File.WriteAllText(versionFile, onlineVersion);
 
-                File.WriteAllText(versionFile, onlineVersion);
-
-                VersionText.Text = onlineVersion;
-                Status = LauncherStatus.ready;
+                    VersionText.Text = onlineVersion;
+                    Status = LauncherStatus.ready;
+                }
+                else
+                {
+                    Status = LauncherStatus.failed;
+                    MessageBox.Show("Error finishing download: UserState is null.");
+                }
             }
             catch (Exception ex)
             {
@@ -172,64 +210,64 @@ namespace GameLauncher
                 CheckForUpdates();
             }
         }
-    }
 
-    struct Version
-    {
-        internal static Version zero = new(0, 0, 0);
-
-        private readonly short major;
-        private readonly short minor;
-        private readonly short subMinor;
-
-        internal Version(short _major, short _minor, short _subMinor)
+        struct Version
         {
-            major = _major;
-            minor = _minor;
-            subMinor = _subMinor;
-        }
-        internal Version(string _version)
-        {
-            string[] versionStrings = _version.Split('.');
-            if (versionStrings.Length != 3)
+            internal static Version zero = new(0, 0, 0);
+
+            private readonly short major;
+            private readonly short minor;
+            private readonly short subMinor;
+
+            internal Version(short _major, short _minor, short _subMinor)
             {
-                major = 0;
-                minor = 0;
-                subMinor = 0;
-                return;
+                major = _major;
+                minor = _minor;
+                subMinor = _subMinor;
+            }
+            internal Version(string _version)
+            {
+                string[] versionStrings = _version.Split('.');
+                if (versionStrings.Length != 3)
+                {
+                    major = 0;
+                    minor = 0;
+                    subMinor = 0;
+                    return;
+                }
+
+                major = short.Parse(versionStrings[0]);
+                minor = short.Parse(versionStrings[1]);
+                subMinor = short.Parse(versionStrings[2]);
             }
 
-            major = short.Parse(versionStrings[0]);
-            minor = short.Parse(versionStrings[1]);
-            subMinor = short.Parse(versionStrings[2]);
-        }
-
-        internal bool IsDifferentThan(Version _otherVersion)
-        {
-            if (major != _otherVersion.major)
+            internal bool IsDifferentThan(Version _otherVersion)
             {
-                return true;
-            }
-            else
-            {
-                if (minor != _otherVersion.minor)
+                if (major != _otherVersion.major)
                 {
                     return true;
                 }
                 else
                 {
-                    if (subMinor != _otherVersion.subMinor)
+                    if (minor != _otherVersion.minor)
                     {
                         return true;
                     }
+                    else
+                    {
+                        if (subMinor != _otherVersion.subMinor)
+                        {
+                            return true;
+                        }
+                    }
                 }
+                return false;
             }
-            return false;
-        }
 
-        public override string ToString()
-        {
-            return $"{major}.{minor}.{subMinor}";
+            public override string ToString()
+            {
+                return $"{major}.{minor}.{subMinor}";
+            }
         }
     }
 }
