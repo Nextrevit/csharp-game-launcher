@@ -25,7 +25,7 @@ namespace GameLauncher
 
         private LauncherStatus _status;
         private readonly IProgress<int> _downloadProgress;
-        private bool _isDownloading = false; // Added variable to track download status
+        private bool _isDownloading = false;
 
         internal LauncherStatus Status
         {
@@ -51,7 +51,6 @@ namespace GameLauncher
                         break;
                 }
 
-                // Toggle the visibility of progress bar and text based on the download status
                 ProgressBar.Visibility = _isDownloading ? Visibility.Visible : Visibility.Hidden;
                 StatusText.Visibility = _isDownloading ? Visibility.Visible : Visibility.Hidden;
             }
@@ -133,7 +132,6 @@ namespace GameLauncher
                     Status = LauncherStatus.downloadingGame;
                 }
 
-                // Set _isDownloading to true at the beginning of the download
                 _isDownloading = true;
 
                 using (HttpResponseMessage response = await httpClient.GetAsync("https://www.dropbox.com/s/4txqq97xuej54dq/Renvirons%20Project.zip?dl=1", HttpCompletionOption.ResponseHeadersRead))
@@ -155,10 +153,8 @@ namespace GameLauncher
                             int percentage = (int)((receivedBytes / (double)totalBytes) * 100);
                             _downloadProgress.Report(percentage);
 
-                            // Use Dispatcher to update UI elements on the main UI thread
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                // Set visibility based on download status
                                 ProgressBar.Visibility = Visibility.Visible;
                                 StatusText.Visibility = Visibility.Visible;
                             });
@@ -166,10 +162,8 @@ namespace GameLauncher
                     }
                 }
 
-                // Set _isDownloading to false after the download is completed
                 _isDownloading = false;
 
-                // Toggle the visibility based on download status
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     ProgressBar.Visibility = Visibility.Hidden;
@@ -235,7 +229,6 @@ namespace GameLauncher
             }
             else if (_isDownloading)
             {
-                // Do nothing or display a message as needed
             }
         }
 
