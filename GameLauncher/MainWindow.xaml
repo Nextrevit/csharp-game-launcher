@@ -23,5 +23,6 @@
         <Button Name="PlayButton" Content="Checking for updates..." Click="PlayButton_Click" Height="66"  FontSize="28" FontWeight="Bold" Foreground="#DDFFFFFF" Margin="128,0,193,140" VerticalAlignment="Bottom" MinWidth="150" Padding="10,1,10,1" Grid.Column="1" BorderBrush="White" BorderThickness="5,5,5,5" RenderTransformOrigin="0.5,0.5" Background="Black"/>
         <ProgressBar Name="ProgressBar" Height="20" VerticalAlignment="Top" Margin="361,467,426,0" Grid.Column="1" Visibility="Hidden"/>
         <TextBlock Name="StatusText" Text="Downloading... %" VerticalAlignment="Top" Margin="389,430,421,0" Grid.Column="1" Height="29" Foreground="White" FontFamily="Segoe UI Variable Display Semibold" FontSize="20" Visibility="Hidden"/>
+        <Image Margin="-3,2,983,463" Source="/RenvironsLogo.png" Stretch="Fill" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>

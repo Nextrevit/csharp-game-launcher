@@ -12,15 +12,19 @@
   <ItemGroup>
     <None Remove="images\Icon.ico" />
     <None Remove="images\LauncherBackground.png" />
+    <None Remove="images\RenvironsLogo.png" />
     <None Remove="LauncherBackground.png" />
     <None Remove="LauncherBackgroundNEW.png" />
+    <None Remove="RenvironsLogo.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="images\Icon.ico" />
     <Resource Include="images\LauncherBackground.png" />
+    <Resource Include="images\RenvironsLogo.png" />
     <Resource Include="LauncherBackground.png" />
     <Resource Include="LauncherBackgroundNEW.png" />
+    <Resource Include="RenvironsLogo.png" />
   </ItemGroup>
 
 </Project>
