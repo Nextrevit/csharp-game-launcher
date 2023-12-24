@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
 using System.Windows;
+using System.Windows.Navigation;
 
 namespace GameLauncher
 {
@@ -27,6 +28,16 @@ namespace GameLauncher
         private readonly IProgress<int> _downloadProgress;
         private bool _isDownloading = false;
 
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            string url = e.Uri.AbsoluteUri;
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+            e.Handled = true;
+        }
         internal LauncherStatus Status
         {
             get => _status;
