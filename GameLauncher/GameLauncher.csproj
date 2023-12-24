@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="fonts\LexendDeca-Regular.ttf" />
     <None Remove="images\Icon.ico" />
     <None Remove="images\LauncherBackground.png" />
     <None Remove="images\Renvirons Text.png" />
@@ -20,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="fonts\LexendDeca-Regular.ttf" />
     <Resource Include="images\Icon.ico" />
     <Resource Include="images\LauncherBackground.png" />
     <Resource Include="images\Renvirons Text.png" />

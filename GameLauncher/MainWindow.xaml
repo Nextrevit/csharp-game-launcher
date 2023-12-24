@@ -16,29 +16,31 @@
         </Grid.ColumnDefinitions>
         <Image Stretch="UniformToFill" Margin="0,0,0,-2" Grid.ColumnSpan="2" Source="/LauncherBackgroundNEW.png"/>
 
-        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Foreground="White" Margin="160,15,0,0" Grid.Column="1">
+        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Foreground="White" Margin="128,15,0,0" Grid.Column="1" FontFamily="pack://application:,,,/Renvirons Project Launcher;component/fonts/LexendDeca-Regular.ttf#Lexend Deca">
             <Hyperlink NavigateUri="https://nextrevit.itch.io/renvirons" RequestNavigate="Hyperlink_RequestNavigate">
                 <Run Text="Website" />
             </Hyperlink>
         </TextBlock>
 
-        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Foreground="White" Margin="344,15,0,0" Grid.Column="1">
+        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Foreground="White" Margin="339,15,0,0" Grid.Column="1" FontFamily="pack://application:,,,/Renvirons Project Launcher;component/fonts/LexendDeca-Regular.ttf#Lexend Deca">
             <Hyperlink NavigateUri="https://renvironsar.webnode.page/" RequestNavigate="Hyperlink_RequestNavigate">
                 <Run Text="Blog" />
             </Hyperlink>
         </TextBlock>
 
-        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Foreground="White" Margin="474,15,0,0" Grid.Column="1">
+        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Foreground="White" Margin="475,15,0,0" Grid.Column="1" FontFamily="pack://application:,,,/Renvirons Project Launcher;component/fonts/LexendDeca-Regular.ttf#Lexend Deca">
             <Hyperlink NavigateUri="https://discord.gg/Re5aGANbMU" RequestNavigate="Hyperlink_RequestNavigate">
                 <Run Text="Discord" />
             </Hyperlink>
         </TextBlock>
 
-        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Foreground="White" Margin="653,15,0,0" Grid.Column="1">
+        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="40" Foreground="White" Margin="680,15,0,0" Grid.Column="1" FontFamily="pack://application:,,,/Renvirons Project Launcher;component/fonts/LexendDeca-Regular.ttf#Lexend Deca">
             <Hyperlink NavigateUri="https://www.buymeacoffee.com/renvironsproject" RequestNavigate="Hyperlink_RequestNavigate">
                 <Run Text="Donate" />
             </Hyperlink>
         </TextBlock>
+        
+        
 
         <TextBlock Name="VersionText" VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20" Foreground="White" Margin="0, 0, 5, 0" Grid.Column="1" ClipToBounds="True" FontWeight="Bold" FontStyle="Italic" TextDecorations="{x:Null}">
             <TextBlock.Effect>
